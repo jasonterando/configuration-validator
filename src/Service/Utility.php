@@ -48,7 +48,7 @@ class Utility {
             $i = 0;
             $ordinal = true;
             foreach($array as $key => $value) {
-                if($key != $i++) {
+                if($key !== $i++) {
                     $ordinal = false;
                     break;
                 }

@@ -71,13 +71,18 @@ abstract class ConfigDefCollector {
     protected function formatYamlNode($parentKey, &$results, $key, $value) {
         // Determine if the only thing below this level are field properties
         $isTerminal = true;
-        $name = null;
         $type = null;
         $required = true;
 
-        // There are two things children can be, properties (i.e. "required" or "type")
-        // or cihld nodes.  Only way to tell is to see if the subkeys match what we expect
-        if(is_array($value)) {
+        // If the value is an array and is an ordinal array (0 => ..., 1 => ...)
+        // then it's a "dead end" and we don't care about this anymore
+        $valueIsArray = is_array($value);
+        $valueIsAssocArray = $valueIsArray && Utility::isAssociativeArray($value);
+        $hasChildren = $valueIsArray ? count($value) > 0 : false;
+
+        if($valueIsAssocArray) {
+            $isTerminal = true;
+            $name = $key;
             foreach($value as $subkey => $subvalue) {
                 switch($subkey) {
                     case "required":
@@ -99,28 +104,22 @@ abstract class ConfigDefCollector {
                         }
                         break;
                     default:
-                        // If node contains items other than "required" or "type" assume it's a list
+                        // If node contains items other than "required" or "type" assume it is a new child list
                         $isTerminal = false;
                         break;
                 }
-                if(! $isTerminal) {
-                    // If child nodes, then revert properties back to defaults
-                    $required = true;
-                    $type = null;
-                    break;
-                }
+                if(! $isTerminal) break;
             }
+        } else if($valueIsArray) {
+            $isTerminal = ! $hasChildren;
         }
 
         // To try and "guess" whether the node we are working with is a value of 
         // an ordinal (# => value) or associative array (key => value)
-        $isOrdinal = is_numeric($key);
-        $name = $isOrdinal ? $value : $key;
-        $hasChildren = is_array($value);
         if($isTerminal) {
             // If this is a terminal value, then return an object
             $result = new StdClass();
-            if(! $hasChildren) {
+            if(! $valueIsArray) {
                 // Look for inline definitions of type or not required (false)
                 if((! isset($type)) && $this->isValidType($value)) {
                     $type = $value;
@@ -133,15 +132,19 @@ abstract class ConfigDefCollector {
             }
             $result->required = $required;
             $result->type = isset($type) ? $type : "any";
-            $results[$name] = $result;
+            $results[$key] = $result;
         } else {
-            // If we are here, then value be children
+            // If we are here, then value has children
             $children = [];
             foreach($value as $subkey => $subvalue) {
-                $this->formatYamlNode($parentKey . $key . '/', $children, $subkey, $subvalue);
+                if($valueIsAssocArray) {
+                    $this->formatYamlNode($parentKey . $key . '/', $children, $subkey, $subvalue);
+                } else {
+                    $this->formatYamlNode($parentKey . $key . '/', $children, $subvalue, []);
+                }
             }
             if(count($children) > 0) {
-                $results[$name] = $children;
+                $results[$key] = $children;
             }
         }
     }

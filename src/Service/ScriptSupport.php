@@ -51,7 +51,7 @@ class ScriptSupport {
             }
             $autoload = require $autoloadFilename;
             $configDefCollector = new AutoloadConfigDefCollector($autoload);
-            $this->configDef = $configDefCollector->collect();
+            $this->configDef = $configDefCollector->getConfigDef();
         }
         return $this->configDef;
     }
@@ -107,7 +107,10 @@ class ScriptSupport {
             if($isArr && (! Utility::isAssociativeArray($value))) {
                 continue;
             }
-            $s .= str_repeat(' ', $depth * 3) . $key . PHP_EOL;
+            $s .= str_repeat(' ', $depth * 3) . 
+                $key . 
+                ($isArr ? ':' : '') .
+                PHP_EOL;
             if($isArr) {
                 $s .= $this->formatAsYaml($value, $depth + 1);
             }

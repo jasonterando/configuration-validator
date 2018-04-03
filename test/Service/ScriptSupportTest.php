@@ -37,13 +37,13 @@ class ScriptSupportTest extends BaseTestCase
             if(! is_dir($tmpDir2)) mkdir($tmpDir2);
             $mock = "<?php" . PHP_EOL . 
                 "\$loader = new Composer\\Autoload\\ClassLoader();" . PHP_EOL . 
-                "\$loader->addPsr4(\"foo\\\\\", [\"$tmpDir1\"]);" .PHP_EOL .  
+                "\$loader->addPsr4(\"foo\\\\\", [\"$tmpDir1\"]);" . PHP_EOL .  
                 "return \$loader;";
             file_put_contents($autoloadFile, $mock);
-            file_put_contents($configDefFile, "foo");
+            file_put_contents($configDefFile, "foo:" . PHP_EOL . "   bar" . PHP_EOL);
             $svc = new ScriptSupport($tmpDir1);
             $configDef = $this->callMethod($svc, 'getConfigDef');
-            $this->assertEquals("foo", $configDef[0]);
+            $this->assertEquals(true, $configDef['foo']['bar']->required);
         } finally {
             unlink($autoloadFile);
             unlink($configDefFile);
@@ -118,7 +118,7 @@ class ScriptSupportTest extends BaseTestCase
             ->getMock();
         $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245]]);
         $yaml = $svc->generateConfigTemplate();
-        $this->assertEquals('foo' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);
+        $this->assertEquals('foo:' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);
     }
 
     public function testScriptSaveConfigTemplate() {
@@ -134,7 +134,7 @@ class ScriptSupportTest extends BaseTestCase
 
             $svc->saveConfigTemplate($yamlFile);
             $yaml = file_get_contents($yamlFile);
-            $this->assertEquals('foo' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);
+            $this->assertEquals('foo:' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);
         } finally {
             unlink($yamlFile);
         }

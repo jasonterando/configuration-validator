@@ -22,12 +22,12 @@ class ConfigValidatorTest extends BaseTestCase {
             ->setMethods(['validateSection', 'validateNode'])
             ->getMock();
     
-        $svc->method('validateSection')->will($this->returnCallback(
+        $svc->expects($this->at(0))->method('validateSection')->will($this->returnCallback(
             function(string $parentKey, string $configDefKey, array $configDefSection, array $config, array &$warnings) { 
                 $warnings[] = 'foo';
             }
         ));
-        $svc->method('validateNode')->will($this->returnCallback(
+        $svc->expects($this->at(1))->method('validateNode')->will($this->returnCallback(
             function(string $parentKey, string $configDefKey, StdClass $configDefValue, array $config, array &$warnings) { 
                 $warnings[] = 'bar';
             }
