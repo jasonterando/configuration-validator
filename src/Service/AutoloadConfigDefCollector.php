@@ -2,7 +2,6 @@
 namespace ConfigurationValidator\Service;
 
 use Composer\Autoload\ClassLoader;
-use ConfigurationValidator\Service\Interfaces\ICollector;
 use Exception;
 
 class AutoloadConfigDefCollector extends ConfigDefCollector {
@@ -53,19 +52,13 @@ class AutoloadConfigDefCollector extends ConfigDefCollector {
      * @return void
      */
     protected function checkDirForConfigYaml($dirName) {
-        for($i = 0; $i < 2; $i++) {
-            switch($i) {
-                case 0:
-                    $path = $dirName . '/config-definition.yaml';
-                    break;
-                case 1:
-                    $path = $dirName . '/config-definition.yml';
-                    break;
-            }
-            $configDef = $this->readYamlFile($path);
+        $mask = "$dirName/config-definition*.{yaml,yml}";
+        foreach(glob($mask, GLOB_BRACE) as $configDefFile) {
+            $configDef = $this->readYamlFile($configDefFile);
             if($configDef) {
                 $this->configData = array_merge_recursive($this->configData, $configDef);
-                break;
+            } else {
+                throw new Exception("Unable to parse configuation definition file $configDefFile");
             }
         }
     }

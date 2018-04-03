@@ -4,10 +4,14 @@ namespace ConfigurationValidator;
 
 use Composer\Script\Event;
 use Composer\Installer\PackageEvent;
-use ConfigurationValidator\Service\AutoloadConfigDefCollector;
-use ConfigurationValidator\Service\ZendModuleConfigCollector;
-use ConfigurationValidator\Service\ConfigValidator;
+use ConfigurationValidator\Service\ScriptSupport;
+use is_set;
+use getcwd;
+use file_put_contents;
 
+/**
+ * @codeCoverageIgnore
+ */
 class Scripts {
 
     /**
@@ -19,34 +23,10 @@ class Scripts {
     public static function ConfigValidate(Event $event)
     {
         try {
-            if (!ini_get('date.timezone')) {
-                ini_set('date.timezone', 'UTC');
-            }
-            
-            // The directory we are running in is assumed to be the "top level" where vendor is located
-            $dir = getcwd();
-            $autoload_filename = $dir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-            if(! file_exists($autoload_filename)) {
-                throw new Exception("Autoload file $autoload_filename not found");
-            }
-            
-            $appconfig_filename = $dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'application.config.php';
-            if(! file_exists($appconfig_filename)) {
-                throw new Exception("Application configuration file $appconfig_filename not found");
-            }
-            
-            $autoLoader = require $autoload_filename;
-            $zendAppConfig = require $appconfig_filename;
-            
-            $configDefCollector = new AutoloadConfigDefCollector($autoLoader);
-            $configCollector = new ZendModuleConfigCollector();
-            
-            $configDef = $configDefCollector->getConfigDef();
-            $config = $configCollector->collect($zendAppConfig);
-            
-            $validator = new ConfigValidator();
-           
-            $warnings = $validator->validate($configDef, $config);
+            // The directory we are running in is assumed to be the "top level" where vendor is located,
+            // there is probably a better way to get this from $event
+            $support = new ScriptSupport(getcwd());
+            $warnings = $support->validate();
             if(count($warnings) == 0) {
                 echo "Validation successful!" . PHP_EOL;
             } else {
@@ -60,5 +40,17 @@ class Scripts {
             fputs(STDERR, "ERROR: " . $e->getMessage() . PHP_EOL);
             exit(-1);
         }
+    }
+
+    public static function ConfigSaveTemplate()
+    {
+        try {
+            $support = new ScriptSupport(getcwd());
+            $saveTo = getcwd() . '/config-definition-' . (new DateTime())->format('Y-m-d-G-i-s') . '.yaml';
+            $support->saveConfigTemplate($saveTo);
+        } catch(Exception $e) {
+            fputs(STDERR, "ERROR: " . $e->getMessage() . PHP_EOL);
+            exit(-1);
+        }        
     }
 }

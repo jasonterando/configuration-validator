@@ -3,7 +3,7 @@ use ConfigurationValidator\Service\ZendModuleConfigCollector;
 
 class ZendModuleConfigCollectorTest extends BaseTestCase
 {
-    public function testZendModuleConfigCollector() {
+    public function testZendModuleConfigCollect() {
         $tempDir = sys_get_temp_dir() . '/testZendDir';
         $tempFile1 = $tempDir . '/foo1.php';
         $tempFile2 = $tempDir . '/foo2.php';
@@ -12,8 +12,8 @@ class ZendModuleConfigCollectorTest extends BaseTestCase
             file_put_contents($tempFile1, "<?php\r\nreturn ['foo' => ['abc' => '123']];\r\n");
             file_put_contents($tempFile2, "<?php\r\nreturn ['foo' => ['def' => '234']];\r\n");
             
-            $svc = new ZendModuleConfigCollector();
-            $config = $svc->collect(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]]);
+            $svc = new ZendModuleConfigCollector(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]]);
+            $config = $svc->collect();
             $this->assertEquals('123', $config['foo']['abc']);
             $this->assertEquals('234', $config['foo']['def']);
         } finally {

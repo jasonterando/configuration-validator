@@ -9,6 +9,14 @@ use is_file;
 class ConfigValidator {
     public const types = ["any", "string", "integer", "number", "boolean", "directory", "file", "url"];
 
+    /**
+     * Validate the configuration using the specified definition, returning
+     * a list of warnings
+     *
+     * @param array $configDef
+     * @param array $config
+     * @return array
+     */
     public function validate(array $configDef, array $config) {
         $warnings = [];
         $this->performValidation('', $configDef, $config, $warnings);
