@@ -20,10 +20,13 @@ class ConfigDefCollectorTest extends BaseTestCase
                 ]
             ],
             "app" => [
+                "foo",
+                "bar",
                 "janus" => [
                     "url" => "url"
                 ],
-                "folder" => false
+                "folder" => false,
+                "fubar"
             ]
         ];
 
@@ -59,6 +62,12 @@ class ConfigDefCollectorTest extends BaseTestCase
         $this->assertEquals(true, $config['app']['janus']['url']->required);
         $this->assertEquals('any', $config['app']['folder']->type);
         $this->assertEquals(false, $config['app']['folder']->required);
+        $this->assertEquals('any', $config['app']['foo']->type);
+        $this->assertEquals(true, $config['app']['foo']->required);
+        $this->assertEquals('any', $config['app']['bar']->type);
+        $this->assertEquals(true, $config['app']['bar']->required);
+        $this->assertEquals('any', $config['app']['fubar']->type);
+        $this->assertEquals(true, $config['app']['fubar']->required);
     }
 
     public function testFormatterBadType() {

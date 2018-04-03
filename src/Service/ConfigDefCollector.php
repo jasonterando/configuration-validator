@@ -84,31 +84,27 @@ abstract class ConfigDefCollector {
             $isTerminal = true;
             $name = $key;
             foreach($value as $subkey => $subvalue) {
-                switch($subkey) {
-                    case "required":
-                        $r = false;
-                        if(Utility::getBoolean($subvalue, $r)) {
-                            $required = $r;
-                        } else {
-                            throw new Exception("Invalid required value \"$subvalue\" specified for " . $parentKey . $key);
-                        }
+                if(strcmp($subkey, "required") == 0) {
+                    $r = false;
+                    if(Utility::getBoolean($subvalue, $r)) {
                         $required = $r;
+                    } else {
+                        throw new Exception("Invalid required value \"$subvalue\" specified for " . $parentKey . $key);
+                    }
+                    $required = $r;
+                    $isTerminal = true;
+                } else if (strcmp($subkey, "type") == 0) {
+                    if($this->isValidType($subvalue)) {
+                        $type = $subvalue;
                         $isTerminal = true;
-                        break;
-                    case "type":
-                        if($this->isValidType($subvalue)) {
-                            $type = $subvalue;
-                            $isTerminal = true;
-                        } else {
-                            throw new Exception("Invalid type \"$subvalue\" specified for " . $parentKey . $key);
-                        }
-                        break;
-                    default:
-                        // If node contains items other than "required" or "type" assume it is a new child list
-                        $isTerminal = false;
-                        break;
+                    } else {
+                        throw new Exception("Invalid type \"$subvalue\" specified for " . $parentKey . $key);
+                    }
+                } else {
+                    // If node contains items other than "required" or "type" assume it is a new child list
+                    $isTerminal = false;
+                    break;
                 }
-                if(! $isTerminal) break;
             }
         } else if($valueIsArray) {
             $isTerminal = ! $hasChildren;
@@ -136,11 +132,13 @@ abstract class ConfigDefCollector {
         } else {
             // If we are here, then value has children
             $children = [];
+            $idx = 0;
             foreach($value as $subkey => $subvalue) {
-                if($valueIsAssocArray) {
-                    $this->formatYamlNode($parentKey . $key . '/', $children, $subkey, $subvalue);
-                } else {
+                if($subkey === $idx) {
                     $this->formatYamlNode($parentKey . $key . '/', $children, $subvalue, []);
+                    $idx++;
+                } else {
+                    $this->formatYamlNode($parentKey . $key . '/', $children, $subkey, $subvalue);
                 }
             }
             if(count($children) > 0) {
