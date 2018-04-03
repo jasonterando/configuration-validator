@@ -34,5 +34,29 @@ class Utility {
                 return false;
         }
     }
+
+    /**
+     * Return true if the array is an associative (not ordinal)
+     * array with items in it
+     *
+     * @param array $array
+     * @return boolean
+     */
+    public static function isAssociativeArray(array $array) {
+        $count = count($array);
+        if($count > 0) {
+            $i = 0;
+            $ordinal = true;
+            foreach($array as $key => $value) {
+                if($key != $i++) {
+                    $ordinal = false;
+                    break;
+                }
+            }
+            return ! $ordinal;
+        } else {
+            return false;
+        }
+    }
 }
 

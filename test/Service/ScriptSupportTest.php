@@ -130,7 +130,7 @@ class ScriptSupportTest extends BaseTestCase
                 ->setConstructorArgs([''])
                 ->setMethods(['getConfig'])
                 ->getMock();
-            $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245]]);
+            $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245, 'efg' => [1, 2, 3]]]);
 
             $svc->saveConfigTemplate($yamlFile);
             $yaml = file_get_contents($yamlFile);

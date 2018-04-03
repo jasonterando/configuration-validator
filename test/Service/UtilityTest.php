@@ -30,4 +30,11 @@ class UtilityTest extends BaseTestCase {
 
         $this->assertEquals(false, Utility::getBoolean("xxx", $r));
     }    
+
+    public function testIsAssociativeArray() {
+        $this->assertEquals(true, Utility::isAssociativeArray(['foo' => 123, 'bar' => 234]));
+        $this->assertEquals(false, Utility::isAssociativeArray([0 => 123, 1 => 234]));
+        $this->assertEquals(true, Utility::isAssociativeArray([0 => 123, 2 => 234]));
+        $this->assertEquals(false, Utility::isAssociativeArray([]));
+    }
 }

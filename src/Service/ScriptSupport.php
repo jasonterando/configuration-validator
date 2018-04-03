@@ -5,6 +5,7 @@ use ConfigurationValidator\Service\AutoloadConfigDefCollector;
 use ConfigurationValidator\Service\ZendModuleConfigCollector;
 use ConfigurationValidator\Service\ConfigValidator;
 use Exception;
+use is_numeric;
 
 class ScriptSupport {
 
@@ -102,8 +103,12 @@ class ScriptSupport {
     protected function formatAsYaml(array $config, $depth = 0) {
         $s = "";
         foreach($config as $key => $value) {
+            $isArr = is_array($value);
+            if($isArr && (! Utility::isAssociativeArray($value))) {
+                continue;
+            }
             $s .= str_repeat(' ', $depth * 3) . $key . PHP_EOL;
-            if(is_array($value)) {
+            if($isArr) {
                 $s .= $this->formatAsYaml($value, $depth + 1);
             }
         }
