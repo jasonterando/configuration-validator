@@ -5,6 +5,7 @@ namespace ConfigurationValidator;
 use Composer\Script\Event;
 use Composer\Installer\PackageEvent;
 use ConfigurationValidator\Service\ScriptSupport;
+use DateTime;
 use is_set;
 use getcwd;
 use file_put_contents;
