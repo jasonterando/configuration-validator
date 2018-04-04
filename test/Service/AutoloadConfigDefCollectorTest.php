@@ -85,11 +85,13 @@ class AutoloadConfigDefCollectorTest extends BaseTestCase
             mkdir($tempDir2);
             file_put_contents($tempFile1, "test1:\r\n  test1A: 123\r\n  test1B: 456\r\ntest2:");
             file_put_contents($tempFile2, "test1:\r\n  test1C: 123\r\n  test1D: 456\r\ntest2:\r\n  test2A: 123");
-            $svc = new AutoloadConfigDefCollector($this->classLoader);
+            $svc = new AutoloadConfigDefCollector($this->classLoader, true);
             $results = [];
             $this->callMethod($svc, "checkDirForConfigYaml", [$tempDir1]);
             $this->callMethod($svc, "checkDirForConfigYaml", [$tempDir2]);
             $results = $this->getProperty($svc, 'configData');
+            $this->expectOutputString("Added configuration definition $tempFile1" . PHP_EOL .
+                "Added configuration definition $tempFile2" . PHP_EOL);
             $this->assertEquals("test1", array_keys($results)[0]);
             $this->assertEquals("123", $results["test1"]["test1A"]);
             $this->assertEquals("456", $results["test1"]["test1B"]);

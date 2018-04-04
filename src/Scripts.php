@@ -9,6 +9,7 @@ use DateTime;
 use is_set;
 use getcwd;
 use file_put_contents;
+use strtolower;
 
 /**
  * @codeCoverageIgnore
@@ -24,10 +25,12 @@ class Scripts {
     public static function ConfigValidate(Event $event)
     {
         try {
+            $args = Scripts::parseArguments($event->getArguments());
             // The directory we are running in is assumed to be the "top level" where vendor is located,
             // there is probably a better way to get this from $event
-            $support = new ScriptSupport(getcwd());
+            $support = new ScriptSupport(getcwd(), $args['debug']);
             $warnings = $support->validate();
+            if($args['debug']) fputs(STDERR, PHP_EOL);
             if(count($warnings) == 0) {
                 echo "Validation successful!" . PHP_EOL;
             } else {
@@ -38,20 +41,42 @@ class Scripts {
                 exit(-2);
             }
         } catch(Exception $e) {
+            if($args['debug']) fputs(STDERR, PHP_EOL);
             fputs(STDERR, "ERROR: " . $e->getMessage() . PHP_EOL);
             exit(-1);
         }
     }
 
-    public static function ConfigSaveTemplate()
+    public static function ConfigSaveTemplate(Event $event)
     {
         try {
-            $support = new ScriptSupport(getcwd());
+            $args = Scripts::parseArguments($event->getArguments());
+            $support = new ScriptSupport(getcwd(), $args['debug']);
             $saveTo = getcwd() . '/config-definition-' . (new DateTime())->format('Y-m-d-G-i-s') . '.yaml';
             $support->saveConfigTemplate($saveTo);
         } catch(Exception $e) {
             fputs(STDERR, "ERROR: " . $e->getMessage() . PHP_EOL);
             exit(-1);
         }        
+    }
+
+    /**
+     * Parse arguments 
+     *
+     * @param array $argments
+     * @return array
+     */
+    public static function parseArguments(array $arguments) {
+        $debug = false;
+        foreach($arguments as $a) {
+            switch(strtolower($a)) {
+                case "debug":
+                    $debug = true;
+                    break;
+            }
+        }
+        return [
+            'debug' => $debug
+        ];
     }
 }

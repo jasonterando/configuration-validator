@@ -9,6 +9,10 @@ use is_file;
 class ConfigValidator {
     public const types = ["any", "string", "integer", "number", "boolean", "directory", "file", "url"];
 
+    public function __construct(bool $debug = false) {
+        $this->debug = $debug;
+    }
+
     /**
      * Validate the configuration using the specified definition, returning
      * a list of warnings

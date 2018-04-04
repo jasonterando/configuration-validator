@@ -9,8 +9,9 @@ use is_numeric;
 
 class ScriptSupport {
 
-    public function __construct(string $applicationDirectory) {
+    public function __construct(string $applicationDirectory, bool $debug = false) {
         $this->applicationDirectory = $applicationDirectory;
+        $this->debug = $debug;
     }
 
     /**
@@ -20,7 +21,7 @@ class ScriptSupport {
      */
     public function validate() {
         $this->ensureTimezone();
-        return (new ConfigValidator())->validate(
+        return (new ConfigValidator($this->debug))->validate(
             $this->getConfigDef(), 
             $this->getConfig());
     }
@@ -43,14 +44,16 @@ class ScriptSupport {
      */
     protected function getConfigDef() {
         if(! isset($this->configDef)) {
-            $autoloadFilename = $this->applicationDirectory . DIRECTORY_SEPARATOR . 
-                'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
-
+            $autoloadFilename = $this->applicationDirectory . '/' . 
+                'vendor' . '/' . 'autoload.php';
             if(! file_exists($autoloadFilename)) {
                 throw new Exception("Autoload file $autoloadFilename not found");
             }
+            if($this->debug) {
+                echo "Using Autoload file $autoloadFilename" . PHP_EOL;
+            }
             $autoload = require $autoloadFilename;
-            $configDefCollector = new AutoloadConfigDefCollector($autoload);
+            $configDefCollector = new AutoloadConfigDefCollector($autoload, $this->debug);
             $this->configDef = $configDefCollector->getConfigDef();
         }
         return $this->configDef;
@@ -63,13 +66,16 @@ class ScriptSupport {
      */
     protected function getConfig() {
         if(! isset($this->config)) {
-            $appConfigFilename = $this->applicationDirectory . DIRECTORY_SEPARATOR . 
-                'config' . DIRECTORY_SEPARATOR . 'application.config.php';
+            $appConfigFilename = $this->applicationDirectory . '/' . 
+                'config' . '/' . 'application.config.php';
             if(! file_exists($appConfigFilename)) {
                 throw new Exception("Application configuration file $appConfigFilename not found");
             }
+            if($this->debug) {
+                echo "Using Application config file $appConfigFilename" . PHP_EOL;
+            }
             $appConfig = require $appConfigFilename;
-            $configCollector = new ZendModuleConfigCollector($appConfig);
+            $configCollector = new ZendModuleConfigCollector($appConfig, $this->debug);
             $this->config = $configCollector->collect();
         }
         return $this->config;
@@ -90,7 +96,15 @@ class ScriptSupport {
      * @return void
      */
     public function saveConfigTemplate($templateFileName) {
-        file_put_contents($templateFileName, $this->generateConfigTemplate());
+        try {
+            file_put_contents($templateFileName, $this->generateConfigTemplate());
+            if($this->debug) {
+                echo "Saved config template to $templateFileName" . PHP_EOL;
+            }
+        } catch(Exception $ex) {
+            throw new Exception("Unable to save config template to $templateFileName: " . $ex->getMessage());
+        }
+        
     }
 
     /**

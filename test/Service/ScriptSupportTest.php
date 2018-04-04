@@ -41,7 +41,9 @@ class ScriptSupportTest extends BaseTestCase
                 "return \$loader;";
             file_put_contents($autoloadFile, $mock);
             file_put_contents($configDefFile, "foo:" . PHP_EOL . "   bar" . PHP_EOL);
-            $svc = new ScriptSupport($tmpDir1);
+            $this->expectOutputString("Using Autoload file $autoloadFile" . PHP_EOL .
+                "Added configuration definition $tmpDir" . DIRECTORY_SEPARATOR . "scriptGetConfigDefTest/config-definition.yaml" . PHP_EOL);
+            $svc = new ScriptSupport($tmpDir1, true);
             $configDef = $this->callMethod($svc, 'getConfigDef');
             $this->assertEquals(true, $configDef['foo']['bar']->required);
         } finally {
@@ -84,7 +86,9 @@ class ScriptSupportTest extends BaseTestCase
                 "return ['foo' => ['abc' => 123]];";
             file_put_contents($appConfigFile, $mockAppConfig);
             file_put_contents($configFile, $mockConfig);
-            $svc = new ScriptSupport($tmpDir1);
+            $svc = new ScriptSupport($tmpDir1, true);
+            $this->expectOutputString("Using Application config file $appConfigFile" . PHP_EOL .
+                "Added configuration $configFile" . PHP_EOL);
             $config = $this->callMethod($svc, 'getConfig');
             $this->assertEquals(123, $config['foo']['abc']);
         } finally {
@@ -137,6 +141,23 @@ class ScriptSupportTest extends BaseTestCase
             $this->assertEquals('foo:' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);
         } finally {
             unlink($yamlFile);
+        }
+    }
+
+    public function testScriptSaveConfigTemplateBadFileName() {
+        $tmpDir = sys_get_temp_dir();
+        $yamlFile = '::\\.\\##??/config-definition-test.yaml';
+
+        try {
+            $svc = $this->getMockBuilder(ScriptSupport::class)
+                ->setConstructorArgs([''])
+                ->setMethods(['getConfig'])
+                ->getMock();
+            $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245, 'efg' => [1, 2, 3]]]);
+            $this->expectException(Exception::class);
+            $svc->saveConfigTemplate($yamlFile);
+        } finally {
+            if(is_file($yamlFile)) unlink($yamlFile); // Should not be...
         }
     }
     

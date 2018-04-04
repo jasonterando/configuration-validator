@@ -8,8 +8,9 @@ use Exception;
  * Based upon Zend's module structure, combine all configuration files
  */
 class ZendModuleConfigCollector {
-    public function __construct(array $zendAppConfig) {
+    public function __construct(array $zendAppConfig, bool $debug = false) {
         $this->zendAppConfig = $zendAppConfig;
+        $this->debug = $debug;
     }
 
     /**
@@ -24,7 +25,9 @@ class ZendModuleConfigCollector {
                 foreach($this->zendAppConfig['module_listener_options']['config_glob_paths'] as $globConfigs) {
                     foreach(glob($globConfigs, GLOB_BRACE) as $globConfig) {
                         if(file_exists($globConfig)) {
-                            // echo "Added configuration $globConfig" . PHP_EOL;
+                            if($this->debug) {
+                                echo "Added configuration $globConfig" . PHP_EOL;
+                            }
                             $results = array_merge_recursive($results, require $globConfig);
                         }
                     }

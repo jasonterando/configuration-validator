@@ -12,8 +12,9 @@ class ZendModuleConfigCollectorTest extends BaseTestCase
             file_put_contents($tempFile1, "<?php\r\nreturn ['foo' => ['abc' => '123']];\r\n");
             file_put_contents($tempFile2, "<?php\r\nreturn ['foo' => ['def' => '234']];\r\n");
             
-            $svc = new ZendModuleConfigCollector(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]]);
-            $config = $svc->collect();
+            $svc = new ZendModuleConfigCollector(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]], true);
+            $this->expectOutputString("Added configuration $tempFile1" . PHP_EOL . "Added configuration $tempFile2" . PHP_EOL);
+            $config = $svc->collect(true);
             $this->assertEquals('123', $config['foo']['abc']);
             $this->assertEquals('234', $config['foo']['def']);
         } finally {

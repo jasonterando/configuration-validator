@@ -6,8 +6,9 @@ use Exception;
 
 class AutoloadConfigDefCollector extends ConfigDefCollector {
 
-    public function __construct(ClassLoader $loader) {
+    public function __construct(ClassLoader $loader, bool $debug = false) {
         $this->loader = $loader;
+        $this->debug = $debug;
     }
 
     /**
@@ -56,7 +57,9 @@ class AutoloadConfigDefCollector extends ConfigDefCollector {
         foreach(glob($mask, GLOB_BRACE) as $configDefFile) {
             $configDef = $this->readYamlFile($configDefFile);
             if($configDef) {
-                // echo "Added configuration definition $configDefFile" . PHP_EOL;
+                if($this->debug) {
+                    echo "Added configuration definition $configDefFile" . PHP_EOL;
+                }
                 $this->configData = array_merge_recursive($this->configData, $configDef);
             } else {
                 throw new Exception("Unable to parse configuation definition file $configDefFile");
