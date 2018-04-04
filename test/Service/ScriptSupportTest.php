@@ -42,7 +42,7 @@ class ScriptSupportTest extends BaseTestCase
             file_put_contents($autoloadFile, $mock);
             file_put_contents($configDefFile, "foo:" . PHP_EOL . "   bar" . PHP_EOL);
             $this->expectOutputString("Using Autoload file $autoloadFile" . PHP_EOL .
-                "Added configuration definition $tmpDir" . DIRECTORY_SEPARATOR . "scriptGetConfigDefTest/config-definition.yaml" . PHP_EOL);
+                "Added Configuration Definition file $tmpDir" . DIRECTORY_SEPARATOR . "scriptGetConfigDefTest/config-definition.yaml" . PHP_EOL);
             $svc = new ScriptSupport($tmpDir1, true);
             $configDef = $this->callMethod($svc, 'getConfigDef');
             $this->assertEquals(true, $configDef['foo']['bar']->required);
@@ -87,8 +87,8 @@ class ScriptSupportTest extends BaseTestCase
             file_put_contents($appConfigFile, $mockAppConfig);
             file_put_contents($configFile, $mockConfig);
             $svc = new ScriptSupport($tmpDir1, true);
-            $this->expectOutputString("Using Application config file $appConfigFile" . PHP_EOL .
-                "Added configuration $configFile" . PHP_EOL);
+            $this->expectOutputString("Using Application Configuration file $appConfigFile" . PHP_EOL .
+                "Added Zend Configuration file $configFile" . PHP_EOL);
             $config = $this->callMethod($svc, 'getConfig');
             $this->assertEquals(123, $config['foo']['abc']);
         } finally {
@@ -102,13 +102,13 @@ class ScriptSupportTest extends BaseTestCase
     public function testScriptGetConfigMissingAppConfig() {
         $tmpDir = sys_get_temp_dir();
         $tmpDir1 = $tmpDir . '/scriptGetConfigTest';
-        $appConfigFile = $tmpDir . '/config/application.config.php';
+        $appConfigFile = $tmpDir1 . '/config/application.config.php';
 
         try {
             if(! is_dir($tmpDir1)) mkdir($tmpDir1);
             $svc = new ScriptSupport($tmpDir1);
             $this->expectException(Exception::class);
-            $this->expectExceptionMessage("Application configuration file");
+            $this->expectExceptionMessage("Application Configuration file $appConfigFile not found");
             $this->callMethod($svc, 'getConfig');
         } finally {
             rmdir($tmpDir1);

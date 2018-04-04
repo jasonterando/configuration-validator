@@ -69,10 +69,10 @@ class ScriptSupport {
             $appConfigFilename = $this->applicationDirectory . '/' . 
                 'config' . '/' . 'application.config.php';
             if(! file_exists($appConfigFilename)) {
-                throw new Exception("Application configuration file $appConfigFilename not found");
+                throw new Exception("Application Configuration file $appConfigFilename not found");
             }
             if($this->debug) {
-                echo "Using Application config file $appConfigFilename" . PHP_EOL;
+                echo "Using Application Configuration file $appConfigFilename" . PHP_EOL;
             }
             $appConfig = require $appConfigFilename;
             $configCollector = new ZendModuleConfigCollector($appConfig, $this->debug);
@@ -98,11 +98,10 @@ class ScriptSupport {
     public function saveConfigTemplate($templateFileName) {
         try {
             file_put_contents($templateFileName, $this->generateConfigTemplate());
-            echo "Saved config template to $templateFileName" . PHP_EOL;
+            echo "Saved Configutation Template to $templateFileName" . PHP_EOL;
         } catch(Exception $ex) {
-            throw new Exception("Unable to save config template to $templateFileName: " . $ex->getMessage());
-        }
-        
+            throw new Exception("Unable to save Configuration Template to $templateFileName: " . $ex->getMessage());
+        }   
     }
 
     /**

@@ -58,11 +58,11 @@ class AutoloadConfigDefCollector extends ConfigDefCollector {
             $configDef = $this->readYamlFile($configDefFile);
             if($configDef) {
                 if($this->debug) {
-                    echo "Added configuration definition $configDefFile" . PHP_EOL;
+                    echo "Added Configuration Definition file $configDefFile" . PHP_EOL;
                 }
                 $this->configData = array_merge_recursive($this->configData, $configDef);
             } else {
-                throw new Exception("Unable to parse configuation definition file $configDefFile");
+                throw new Exception("Unable to Parse Configuation Definition file $configDefFile");
             }
         }
     }

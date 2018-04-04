@@ -26,7 +26,7 @@ class ZendModuleConfigCollector {
                     foreach(glob($globConfigs, GLOB_BRACE) as $globConfig) {
                         if(file_exists($globConfig)) {
                             if($this->debug) {
-                                echo "Added configuration $globConfig" . PHP_EOL;
+                                echo "Added Zend Configuration file $globConfig" . PHP_EOL;
                             }
                             $results = array_merge_recursive($results, require $globConfig);
                         }

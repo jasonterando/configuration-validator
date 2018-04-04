@@ -90,8 +90,8 @@ class AutoloadConfigDefCollectorTest extends BaseTestCase
             $this->callMethod($svc, "checkDirForConfigYaml", [$tempDir1]);
             $this->callMethod($svc, "checkDirForConfigYaml", [$tempDir2]);
             $results = $this->getProperty($svc, 'configData');
-            $this->expectOutputString("Added configuration definition $tempFile1" . PHP_EOL .
-                "Added configuration definition $tempFile2" . PHP_EOL);
+            $this->expectOutputString("Added Configuration Definition file $tempFile1" . PHP_EOL .
+                "Added Configuration Definition file $tempFile2" . PHP_EOL);
             $this->assertEquals("test1", array_keys($results)[0]);
             $this->assertEquals("123", $results["test1"]["test1A"]);
             $this->assertEquals("456", $results["test1"]["test1B"]);
