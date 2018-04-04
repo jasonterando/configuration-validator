@@ -10,32 +10,26 @@ Currently, Configuration Definition files are located using directories included
 ### Installation
 To use this:
 
-1. Include the repo and the require line in your project's composer.json file
-2. Add the composer script line
+1. $un ```composer require jasonterando/configuration-validator```
+2. Add the composer script lines to composer.json
 
 ````
 {
-    "repositories": [
-        // ...
-        { "type": "vcs", "url": "/Projects/ConfigurationValidator" }
-    ],
-    "require": {
-        // ...
-        "configuration-validator": "master"
-    },
     "scripts": {
-        "config-validate": "config-validate"
+        "config-validate": "ConfigurationValidator\\Scripts::ConfigValidate",
+        "config-save-template": "ConfigurationValidator\\Scripts::ConfigSaveTemplate"
     }
 }
 ````
 
-3. Run ```composer install``` (or ```composer update```)
 ### Usage
 From the application's main directory, run ```composer config-validate``` to run the validation.  If everything checks out, a success message will be displayed and the exit code will be zero.
 
 If the validation fails, due to missing or invalid configuration entries, warnings will be displayed and the exit code will be -2.
 
 If the validation cannot run due to a fatal error, the exception message will be displayed and the exit code will be -1.
+
+If you need to create a configuration validation file from scratch, you can run ```composer config-save-template``` which will create a definition file, based upon the application's current configuration, that you can refine and include with your module/library.  Note that this file will include _all_ application configuration, so you will want to remove entries that aren't required by your specific module, and likely set some types, before moving the file to your module's folder.
 
 ### CI/CD Integration
 During deployment, after installing/updating configuration files, run ```composer config-validate``` to validate the configuration.  Any exit code other than zero should be treated as a failure and stop the deployment.
