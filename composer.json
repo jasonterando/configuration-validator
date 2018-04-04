@@ -2,16 +2,14 @@
     "name": "jasonterando/config-validator",
     "description": "Utility to collect and validate configuration information",
     "license": "MIT",
+    "version": "0.1.0",
     "keywords": [
         "configuration",
         "validation"
     ],
-    "homepage": "http://gitlab.digitalroominc.com/",
+    "homepage": "https://github.com/jasonterando/configuration-validator/",
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "bin": [
-        "config-validate"
-    ],
     "require": {
         "php": "^5.6 || ^7.0",
         "mustangostang/spyc": "^0.6.2"
