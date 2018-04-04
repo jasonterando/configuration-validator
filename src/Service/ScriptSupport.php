@@ -98,9 +98,7 @@ class ScriptSupport {
     public function saveConfigTemplate($templateFileName) {
         try {
             file_put_contents($templateFileName, $this->generateConfigTemplate());
-            if($this->debug) {
-                echo "Saved config template to $templateFileName" . PHP_EOL;
-            }
+            echo "Saved config template to $templateFileName" . PHP_EOL;
         } catch(Exception $ex) {
             throw new Exception("Unable to save config template to $templateFileName: " . $ex->getMessage());
         }
