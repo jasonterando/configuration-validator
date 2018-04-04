@@ -31,6 +31,8 @@ If the validation cannot run due to a fatal error, the exception message will be
 
 If you need to create a configuration validation file from scratch, you can run ```composer config-save-template``` which will create a definition file, based upon the application's current configuration, that you can refine and include with your module/library.  Note that this file will include _all_ application configuration, so you will want to remove entries that aren't required by your specific module, and likely set some types, before moving the file to your module's folder.
 
+Both of the Composer scripts shown above can be run with the ```debug``` argument to provide more information about what files are being accessed.
+
 ### CI/CD Integration
 During deployment, after installing/updating configuration files, run ```composer config-validate``` to validate the configuration.  Any exit code other than zero should be treated as a failure and stop the deployment.
 
