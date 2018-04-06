@@ -28,7 +28,7 @@ class Scripts {
             $args = Scripts::parseArguments($event->getArguments());
             // The directory we are running in is assumed to be the "top level" where vendor is located,
             // there is probably a better way to get this from $event
-            $support = new ScriptSupport(getcwd(), $args['debug']);
+            $support = new ScriptSupport(getcwd(), $args['ini'], $args['debug']);
             $warnings = $support->validate();
             if($args['debug']) fputs(STDERR, PHP_EOL);
             if(count($warnings) == 0) {
@@ -51,7 +51,7 @@ class Scripts {
     {
         try {
             $args = Scripts::parseArguments($event->getArguments());
-            $support = new ScriptSupport(getcwd(), $args['debug']);
+            $support = new ScriptSupport(getcwd(), $args['ini'], $args['debug']);
             $saveTo = getcwd() . '/config-definition-' . (new DateTime())->format('Y-m-d-G-i-s') . '.yaml';
             $support->saveConfigTemplate($saveTo);
         } catch(Exception $e) {
@@ -68,15 +68,27 @@ class Scripts {
      */
     public static function parseArguments(array $arguments) {
         $debug = false;
-        foreach($arguments as $a) {
+        $ini = null;
+        $argCount = count($arguments);
+        $i = 0;
+        while($i < $argCount) {
             switch(strtolower($a)) {
                 case "debug":
+                case "--debug":
+                case "-d":
                     $debug = true;
                     break;
+                case "--ini":
+                    if($i < $argCount - 1) {
+                        $ini = $arguments[++$i];
+                    } else {
+                        throw new Exception("--ini must be followed by an INI file name");
+                    }
             }
         }
         return [
-            'debug' => $debug
+            'debug' => $debug,
+            'ini' => $ini
         ];
     }
 }

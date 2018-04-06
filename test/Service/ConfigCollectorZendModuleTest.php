@@ -1,5 +1,5 @@
 <?php
-use ConfigurationValidator\Service\ZendModuleConfigCollector;
+use ConfigurationValidator\Service\ConfigCollectorZendModule;
 
 class ZendModuleConfigCollectorTest extends BaseTestCase
 {
@@ -8,20 +8,20 @@ class ZendModuleConfigCollectorTest extends BaseTestCase
         $tempFile1 = $tempDir . '/foo1.php';
         $tempFile2 = $tempDir . '/foo2.php';
         try {
-            mkdir($tempDir);
+            if(! is_dir($tempDir)) mkdir($tempDir);
             file_put_contents($tempFile1, "<?php\r\nreturn ['foo' => ['abc' => '123']];\r\n");
             file_put_contents($tempFile2, "<?php\r\nreturn ['foo' => ['def' => '234']];\r\n");
             
-            $svc = new ZendModuleConfigCollector(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]], true);
+            $svc = new ConfigCollectorZendModule(['module_listener_options' => ['config_glob_paths' => [$tempDir . '/*.php']]], true);
             $this->expectOutputString("Added Zend Configuration file $tempFile1" . PHP_EOL . 
                 "Added Zend Configuration file $tempFile2" . PHP_EOL);
             $config = $svc->collect(true);
             $this->assertEquals('123', $config['foo']['abc']);
             $this->assertEquals('234', $config['foo']['def']);
         } finally {
-            unlink($tempFile1);
-            unlink($tempFile2);
-            rmdir($tempDir);
+            if(is_file($tempFile1)) unlink($tempFile1);
+            if(is_file($tempFile2)) unlink($tempFile2);
+            if(is_dir($tempDir)) rmdir($tempDir);
         }
     }
 }

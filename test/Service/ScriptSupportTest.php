@@ -43,7 +43,7 @@ class ScriptSupportTest extends BaseTestCase
             file_put_contents($configDefFile, "foo:" . PHP_EOL . "   bar" . PHP_EOL);
             $this->expectOutputString("Using Autoload file $autoloadFile" . PHP_EOL .
                 "Added Configuration Definition file $tmpDir" . DIRECTORY_SEPARATOR . "scriptGetConfigDefTest/config-definition.yaml" . PHP_EOL);
-            $svc = new ScriptSupport($tmpDir1, true);
+            $svc = new ScriptSupport($tmpDir1, null, true);
             $configDef = $this->callMethod($svc, 'getConfigDef');
             $this->assertEquals(true, $configDef['foo']['bar']->required);
         } finally {
@@ -86,7 +86,7 @@ class ScriptSupportTest extends BaseTestCase
                 "return ['foo' => ['abc' => 123]];";
             file_put_contents($appConfigFile, $mockAppConfig);
             file_put_contents($configFile, $mockConfig);
-            $svc = new ScriptSupport($tmpDir1, true);
+            $svc = new ScriptSupport($tmpDir1, null, true);
             $this->expectOutputString("Using Application Configuration file $appConfigFile" . PHP_EOL .
                 "Added Zend Configuration file $configFile" . PHP_EOL);
             $config = $this->callMethod($svc, 'getConfig');
@@ -131,7 +131,7 @@ class ScriptSupportTest extends BaseTestCase
 
         try {
             $svc = $this->getMockBuilder(ScriptSupport::class)
-                ->setConstructorArgs(['', true])
+                ->setConstructorArgs(['', null, true])
                 ->setMethods(['getConfig'])
                 ->getMock();
             $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245, 'efg' => [1, 2, 3]]]);
@@ -162,4 +162,22 @@ class ScriptSupportTest extends BaseTestCase
         }
     }
     
+    public function testScriptGenerateFromIniFile() {
+        $tmpDir = sys_get_temp_dir();
+        $tmpDir1 = $tmpDir . '/scriptGenFromIniTest';
+        $iniFile = $tmpDir . '/test.ini';
+
+        try {
+            if(! is_dir($tmpDir1)) mkdir($tmpDir1);
+            file_put_contents($iniFile, "[abc]\r\nfoo.bar=123\r\n");
+            $svc = new ScriptSupport('', $iniFile, true);
+            $this->expectOutputString("Added INI Configuration file $iniFile" . PHP_EOL);
+            $yaml = $svc->generateConfigTemplate();
+            $this->assertEquals("abc:" . PHP_EOL . "   foo:" . PHP_EOL . "      bar" . PHP_EOL, $yaml);
+        } finally {
+            if(is_file($iniFile)) unlink($iniFile);
+            if(is_dir($tmpDir1)) rmdir($tmpDir1);
+        }
+    }
+
 }

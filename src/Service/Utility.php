@@ -58,5 +58,36 @@ class Utility {
             return false;
         }
     }
+
+    /**
+     * Merge the second array into the first (like array_merge_recursive),
+     * but don't automatically change non-array nodes to arrays - 
+     * instead, overwrite them
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return void
+     */
+    public static function array_merge_into(array &$arr1, array $arr2) {
+        foreach($arr2 as $key => $value) {
+            if(array_key_exists($key, $arr1)) {
+                $isArray1 = is_array($arr1[$key]);
+                $isArray2 = is_array($value);
+                if($isArray1) {
+                    if($isArray2) {
+                        self::array_merge_into($arr1[$key], $value);
+                    } else {
+                        $arr1[$key][] = $value;
+                    }
+                } else {
+                    $arr1[$key] = $value;
+                }
+            } else {
+                $arr1[$key] = $value;
+            }
+        }
+        return $arr1;
+    }
+    
 }
 

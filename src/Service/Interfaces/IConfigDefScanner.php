@@ -1,7 +1,7 @@
 <?php
 namespace ConfigurationValidator\Service\Interfaces;
 
-interface IConfigDefFileScanner {
+interface IConfigDefScanner {
     /**
      * This function must return a hierarchical array of configuration definition info
      *

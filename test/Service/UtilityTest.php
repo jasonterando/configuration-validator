@@ -37,4 +37,33 @@ class UtilityTest extends BaseTestCase {
         $this->assertEquals(true, Utility::isAssociativeArray([0 => 123, 2 => 234]));
         $this->assertEquals(false, Utility::isAssociativeArray([]));
     }
+
+    public function testArrayMergeSimple() {
+        $this->doArrayMerge(
+            ['abc' => 123], ['def' => 456],
+            ['abc' => 123, 'def' => 456]);
+    }
+
+    public function testArrayMergeDeep1() {
+        $this->doArrayMerge(
+            ['foo' => ['abc' => 123]], ['foo' => ['def' => 456]], 
+            ['foo' => ['abc' => 123, 'def' => 456]]);
+    }
+
+    public function testArrayMergeDeep2() {
+        $this->doArrayMerge(
+            ['foo' => ['abc' => 123, 'def' => 456]], ['foo' => ['def' => ['ghi' => 789]]], 
+            ['foo' => ['abc' => 123, 'def' => ['ghi' => 789]]]);
+    }
+
+    public function testArrayMergeDeep3() {
+        $this->doArrayMerge(
+            ['abc' => 123], ['def' => 456], 
+            ['abc' => 123, 'def' => 456]);
+    }
+
+    private function doArrayMerge($arr1, $arr2, $expectedResults) {
+        $results = Utility::array_merge_into($arr1, $arr2);
+        $this->assertEquals($expectedResults, $results);
+    }
 }

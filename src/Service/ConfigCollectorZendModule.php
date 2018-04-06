@@ -3,11 +3,12 @@ namespace ConfigurationValidator\Service;
 
 use Composer\Autoload\ClassLoader;
 use Exception;
+use ConfigurationValidator\Service\Interfaces\IConfigCollector;
 
 /**
  * Based upon Zend's module structure, combine all configuration files
  */
-class ZendModuleConfigCollector {
+class ConfigCollectorZendModule implements IConfigCollector {
     public function __construct(array $zendAppConfig, bool $debug = false) {
         $this->zendAppConfig = $zendAppConfig;
         $this->debug = $debug;

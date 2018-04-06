@@ -61,35 +61,6 @@ class ConfigDefCollectorTest extends BaseTestCase
         $this->assertEquals($expectedResults, $results);
     }
 
-    public function testArrayMergeSimple() {
-        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
-            ['abc' => 123], ['def' => 456], 
-            ['abc' => 123, 'def' => 456]);
-    }
-
-    public function testArrayMergeDeep1() {
-        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
-            ['foo' => ['abc' => 123]], ['foo' => ['def' => 456]], 
-            ['foo' => ['abc' => 123, 'def' => 456]]);
-    }
-
-    public function testArrayMergeDeep2() {
-        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
-            ['foo' => ['abc' => 123, 'def' => 456]], ['foo' => ['def' => ['ghi' => 789]]], 
-            ['foo' => ['abc' => 123, 'def' => ['ghi' => 789]]]);
-    }
-
-    public function testArrayMergeDeep3() {
-        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
-            ['foo' => ['abc' => 123, 'def' => []]], ['foo' => ['abc' => 123, 'def' => (object) ['ghi' => 789]]], 
-            ['foo' => ['abc' => 123, 'def' => [(object) ['ghi' => 789]]]]);
-    }
-    
-    private function doArrayMerge($svc, $arr1, $arr2, $expectedResults) {
-        $results = $this->callMethod($svc, 'array_merge_into', [&$arr1, $arr2]);
-        $this->assertEquals($expectedResults, $results);
-    }
-
     public function testFormatterValid() {
         $svc = new ConfigDefCollector([$this->fileScanner]);
         $config = $this->callMethod($svc, 'format', [$this->yaml]);

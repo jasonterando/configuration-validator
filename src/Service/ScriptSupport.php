@@ -2,16 +2,18 @@
 namespace ConfigurationValidator\Service;
 
 use ConfigurationValidator\Service\ConfigDefCollector;
-use ConfigurationValidator\Service\ConfigDefAutoloadScanner;
-use ConfigurationValidator\Service\ZendModuleConfigCollector;
+use ConfigurationValidator\Service\ConfigDefScannerAutoload;
+use ConfigurationValidator\Service\ConfigCollectorIniFiles;
+use ConfigurationValidator\Service\ConfigCollectorZendModule;
 use ConfigurationValidator\Service\ConfigValidator;
 use Exception;
 use is_numeric;
 
 class ScriptSupport {
 
-    public function __construct(string $applicationDirectory, bool $debug = false) {
+    public function __construct(string $applicationDirectory, string $iniFile = null, bool $debug = false) {
         $this->applicationDirectory = $applicationDirectory;
+        $this->iniFile = $iniFile;
         $this->debug = $debug;
     }
 
@@ -54,7 +56,7 @@ class ScriptSupport {
                 echo "Using Autoload file $autoloadFilename" . PHP_EOL;
             }
             $autoload = require $autoloadFilename;
-            $autoloadFileScanner = new ConfigDefAutoloadScanner($autoload, $this->debug);
+            $autoloadFileScanner = new ConfigDefScannerAutoload($autoload, $this->debug);
             $configDefCollector = new ConfigDefCollector([$autoloadFileScanner], $this->debug);
             $this->configDef = $configDefCollector->collect();
         }
@@ -68,16 +70,20 @@ class ScriptSupport {
      */
     protected function getConfig() {
         if(! isset($this->config)) {
-            $appConfigFilename = $this->applicationDirectory . '/' . 
-                'config' . '/' . 'application.config.php';
-            if(! file_exists($appConfigFilename)) {
-                throw new Exception("Application Configuration file $appConfigFilename not found");
+            if($this->iniFile) {
+                $configCollector = new ConfigCollectorIniFiles($this->iniFile, $this->debug);
+            } else {
+                $appConfigFilename = $this->applicationDirectory . '/' . 
+                    'config' . '/' . 'application.config.php';
+                if(! file_exists($appConfigFilename)) {
+                    throw new Exception("Application Configuration file $appConfigFilename not found");
+                }
+                if($this->debug) {
+                    echo "Using Application Configuration file $appConfigFilename" . PHP_EOL;
+                }
+                $appConfig = require $appConfigFilename;
+                $configCollector = new ConfigCollectorZendModule($appConfig, $this->debug);
             }
-            if($this->debug) {
-                echo "Using Application Configuration file $appConfigFilename" . PHP_EOL;
-            }
-            $appConfig = require $appConfigFilename;
-            $configCollector = new ZendModuleConfigCollector($appConfig, $this->debug);
             $this->config = $configCollector->collect();
         }
         return $this->config;
