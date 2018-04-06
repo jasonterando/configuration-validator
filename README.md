@@ -10,7 +10,7 @@ Currently, Configuration Definition files are located using directories included
 ### Installation
 To use this:
 
-1. $un ```composer require jasonterando/configuration-validator```
+1. Run ```composer require jasonterando/configuration-validator```
 2. Add the composer script lines to composer.json
 
 ````
