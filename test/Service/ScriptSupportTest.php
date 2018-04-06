@@ -131,11 +131,12 @@ class ScriptSupportTest extends BaseTestCase
 
         try {
             $svc = $this->getMockBuilder(ScriptSupport::class)
-                ->setConstructorArgs([''])
+                ->setConstructorArgs(['', true])
                 ->setMethods(['getConfig'])
                 ->getMock();
             $svc->method('getConfig')->willReturn(['foo' => ['abc' => 123, 'def' => 245, 'efg' => [1, 2, 3]]]);
 
+            $this->expectOutputString("Saved Configutation Template to $yamlFile" . PHP_EOL);
             $svc->saveConfigTemplate($yamlFile);
             $yaml = file_get_contents($yamlFile);
             $this->assertEquals('foo:' . PHP_EOL . '   abc' . PHP_EOL . '   def' . PHP_EOL, $yaml);

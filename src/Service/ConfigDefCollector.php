@@ -3,6 +3,7 @@ namespace ConfigurationValidator\Service;
 
 use StdClass;
 use Exception;
+use ConfiguraitonValidator\Service\Interfaces\IConfigDefFileScanner;
 
 /**
  * This class is the base class for collecting configuration, and then formatting it
@@ -10,13 +11,13 @@ use Exception;
  * is to make sure we are properly identifying lists of configuration settings versus
  * the properties of those settings ("type" and "required")
  */
-abstract class ConfigDefCollector {
+ class ConfigDefCollector {
     /**
-     * Holds the configuration that will be read from files (or wherever)
+     * Holds the objects we will be using to scan file config def files
      *
      * @var array
      */
-    protected $configData = [];
+    protected $fileScanners = [];
 
     /**
      * Hold the formatted configuration definition
@@ -25,23 +26,38 @@ abstract class ConfigDefCollector {
      */
     protected $configDef = [];
 
+    public function __construct(array $fileScanners, bool $debug = false) {
+        foreach($fileScanners as $fileScanner) {
+            if(is_subclass_of($fileScanner, 'IConfigDefFileScanner')) {
+                throw new Exception('File scanners must implement IConfigDefFileScanner');
+            }
+        }
+        $this->fileScanners = $fileScanners;
+        $this->debug = $debug;
+    }
+
     /**
      * Utility function that collects, formats and returns configuration definition
      *
      * @return array
      */
-    public function getConfigDef() {
-        if(count($this->configDef) == 0) {
-            $this->collect();
-            $this->format();
+    public function collect() {
+        // Collect all configuration definitions
+        $configDefs = [];
+        foreach($this->fileScanners as $fileScanner) {
+            $configDefFiles = $fileScanner->scanForFiles();
+            foreach($configDefFiles as $configDefFileName => $configDefContents) {
+                $configDefs[$configDefFileName] = $this->format($configDefContents);
+            }
         }
-        return $this->configDef;
+
+        // For now, just do a merge
+        $results = [];
+        foreach($configDefs as $configDef) {
+            $this->array_merge_into($results, $configDef);
+        }
+        return $results;
     }
-    
-    /**
-     * Child class must implement this funtion that collects "raw" configuration data
-     */
-    abstract public function collect();
 
     /**
      * Format the raw config data into a workable hierarchy,
@@ -50,16 +66,16 @@ abstract class ConfigDefCollector {
      *
      * @return void
      */
-    public function format() {
+    protected function format($config) {
         $configDef = [];
-        foreach($this->configData as $key => $value) {
-            $this->formatYamlNode('', $configDef, $key, $value);
+        foreach($config as $key => $value) {
+            $this->formatConfigDefNode('', $configDef, $key, $value);
         }
-        $this->configDef = $configDef;
+        return $configDef;
     }
 
     /**
-     * Formats the YAML node into an array if it has children,
+     * Formats the config definition node into an array if it has children,
      * or an object if it is a node
      *
      * @param string $parentKey
@@ -68,7 +84,7 @@ abstract class ConfigDefCollector {
      * @param any    $value
      * @return void
      */
-    protected function formatYamlNode($parentKey, &$results, $key, $value) {
+    protected function formatConfigDefNode($parentKey, &$results, $key, $value) {
         // Determine if the only thing below this level are field properties
         $isTerminal = true;
         $type = null;
@@ -135,10 +151,10 @@ abstract class ConfigDefCollector {
             $idx = 0;
             foreach($value as $subkey => $subvalue) {
                 if($subkey === $idx) {
-                    $this->formatYamlNode($parentKey . $key . '/', $children, $subvalue, []);
+                    $this->formatConfigDefNode($parentKey . $key . '/', $children, $subvalue, []);
                     $idx++;
                 } else {
-                    $this->formatYamlNode($parentKey . $key . '/', $children, $subkey, $subvalue);
+                    $this->formatConfigDefNode($parentKey . $key . '/', $children, $subkey, $subvalue);
                 }
             }
             if(count($children) > 0) {
@@ -155,5 +171,35 @@ abstract class ConfigDefCollector {
      */
     protected function isValidType($type) {
         return in_array($type, ConfigValidator::types);
+    }
+
+    /**
+     * Merge the second array into the first (like array_merge_recursive),
+     * but don't automatically change non-array nodes to arrays - 
+     * instead, overwrite them
+     *
+     * @param array $arr1
+     * @param array $arr2
+     * @return void
+     */
+    protected function array_merge_into(array &$arr1, array $arr2) {
+        foreach($arr2 as $key => $value) {
+            if(array_key_exists($key, $arr1)) {
+                $isArray1 = is_array($arr1[$key]);
+                $isArray2 = is_array($value);
+                if($isArray1) {
+                    if($isArray2) {
+                        $this->array_merge_into($arr1[$key], $value);
+                    } else {
+                        $arr1[$key][] = $value;
+                    }
+                } else {
+                    $arr1[$key] = $value;
+                }
+            } else {
+                $arr1[$key] = $value;
+            }
+        }
+        return $arr1;
     }
 }

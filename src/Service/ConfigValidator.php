@@ -41,6 +41,7 @@ class ConfigValidator {
         foreach($configDef as $configDefKey => $configDefValue) {
             // Value can be an array, which means there are children, 
             // or an object, whch means we should validate the node
+            $valueIsArray = is_array($configDefValue);
             if(is_array($configDefValue)) {
                 $this->validateSection($parentKey, $configDefKey, $configDefValue, $config, $warnings);
             } else {

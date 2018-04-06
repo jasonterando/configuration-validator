@@ -1,7 +1,8 @@
 <?php
 namespace ConfigurationValidator\Service;
 
-use ConfigurationValidator\Service\AutoloadConfigDefCollector;
+use ConfigurationValidator\Service\ConfigDefCollector;
+use ConfigurationValidator\Service\ConfigDefAutoloadScanner;
 use ConfigurationValidator\Service\ZendModuleConfigCollector;
 use ConfigurationValidator\Service\ConfigValidator;
 use Exception;
@@ -53,8 +54,9 @@ class ScriptSupport {
                 echo "Using Autoload file $autoloadFilename" . PHP_EOL;
             }
             $autoload = require $autoloadFilename;
-            $configDefCollector = new AutoloadConfigDefCollector($autoload, $this->debug);
-            $this->configDef = $configDefCollector->getConfigDef();
+            $autoloadFileScanner = new ConfigDefAutoloadScanner($autoload, $this->debug);
+            $configDefCollector = new ConfigDefCollector([$autoloadFileScanner], $this->debug);
+            $this->configDef = $configDefCollector->collect();
         }
         return $this->configDef;
     }
@@ -98,7 +100,9 @@ class ScriptSupport {
     public function saveConfigTemplate($templateFileName) {
         try {
             file_put_contents($templateFileName, $this->generateConfigTemplate());
-            echo "Saved Configutation Template to $templateFileName" . PHP_EOL;
+            if($this->debug) {
+                echo "Saved Configutation Template to $templateFileName" . PHP_EOL;
+            }
         } catch(Exception $ex) {
             throw new Exception("Unable to save Configuration Template to $templateFileName: " . $ex->getMessage());
         }   

@@ -1,8 +1,11 @@
 <?php
+use ConfigurationValidator\Service\Interfaces\IConfigDefFileScanner;
 use ConfigurationValidator\Service\ConfigDefCollector;
 
 class ConfigDefCollectorTest extends BaseTestCase
 {
+    protected $fileScanner = [];
+    
     public function setUp() {
         $this->yaml = [
             "aws" => [
@@ -20,6 +23,7 @@ class ConfigDefCollectorTest extends BaseTestCase
                 ]
             ],
             "app" => [
+                "abc" => 123,
                 "foo",
                 "bar",
                 "janus" => [
@@ -30,26 +34,65 @@ class ConfigDefCollectorTest extends BaseTestCase
             ]
         ];
 
-        $this->svc = $this->getMockBuilder(ConfigDefCollector::class)
-            ->setMethods(['collect'])
+        $this->fileScanner = $this->getMockBuilder(IConfigDefFileScanner::class)
+            ->setMethods(['scanForFiles'])
             ->getMock();
     }
 
-    public function testGetConfigDef() {
+    public function testConfigDefCollect() {
         $svc = $this->getMockBuilder(ConfigDefCollector::class)
-            ->setMethods(['collect', 'format'])
+            ->setConstructorArgs([[$this->fileScanner]])
+            ->setMethods(['format'])
             ->getMock();
-        $svc->expects($this->at(0))->method('collect');
-        $svc->expects($this->at(1))->method('format')->will($this->returnCallback(function() use ($svc) {
-            $this->setProperty($svc, 'configDef', ['foo']);
-        }));
-        $this->assertEquals(['foo'], $svc->getConfigDef());
+
+        $mappedYaml = ['abc' => ['def' => 123]];
+        $expectedResults = ['abc' => ['def' => (object) ['type' => 'any', 'required' => true]]];
+        
+        $this->fileScanner->expects($this->at(0))
+            ->method('scanForFiles')
+            ->willReturn(['foo.yaml' => $mappedYaml]);
+
+        $svc->expects($this->at(0))
+            ->method('format')
+            ->with($mappedYaml)
+            ->willReturn($expectedResults);
+        
+        $results = $svc->collect();
+        $this->assertEquals($expectedResults, $results);
+    }
+
+    public function testArrayMergeSimple() {
+        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
+            ['abc' => 123], ['def' => 456], 
+            ['abc' => 123, 'def' => 456]);
+    }
+
+    public function testArrayMergeDeep1() {
+        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
+            ['foo' => ['abc' => 123]], ['foo' => ['def' => 456]], 
+            ['foo' => ['abc' => 123, 'def' => 456]]);
+    }
+
+    public function testArrayMergeDeep2() {
+        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
+            ['foo' => ['abc' => 123, 'def' => 456]], ['foo' => ['def' => ['ghi' => 789]]], 
+            ['foo' => ['abc' => 123, 'def' => ['ghi' => 789]]]);
+    }
+
+    public function testArrayMergeDeep3() {
+        $this->doArrayMerge(new ConfigDefCollector([$this->fileScanner]), 
+            ['foo' => ['abc' => 123, 'def' => []]], ['foo' => ['abc' => 123, 'def' => (object) ['ghi' => 789]]], 
+            ['foo' => ['abc' => 123, 'def' => [(object) ['ghi' => 789]]]]);
+    }
+    
+    private function doArrayMerge($svc, $arr1, $arr2, $expectedResults) {
+        $results = $this->callMethod($svc, 'array_merge_into', [&$arr1, $arr2]);
+        $this->assertEquals($expectedResults, $results);
     }
 
     public function testFormatterValid() {
-        $this->setProperty($this->svc, "configData", $this->yaml);
-        $this->svc->format();
-        $config = $this->getProperty($this->svc, "configDef", $this->yaml);
+        $svc = new ConfigDefCollector([$this->fileScanner]);
+        $config = $this->callMethod($svc, 'format', [$this->yaml]);
         $this->assertEquals('any', $config['aws']['version']->type);
         $this->assertEquals(false, $config['aws']['version']->required);
         $this->assertEquals('any', $config['aws']['region']->type);
@@ -72,17 +115,17 @@ class ConfigDefCollectorTest extends BaseTestCase
 
     public function testFormatterBadType() {
         $this->yaml['aws']['version']['type']= 'BOGUS';
-        $this->setProperty($this->svc, "configData", $this->yaml);
+        $svc = new ConfigDefCollector([$this->fileScanner]);
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Invalid type \"BOGUS\" specified for aws/version");
-        $this->svc->format();
+        $this->callMethod($svc, 'format', [$this->yaml]);
     }
 
     public function testFormatterBadRequired() {
         $this->yaml['aws']['version']['required']= 'BOGUS';
-        $this->setProperty($this->svc, "configData", $this->yaml);
+        $svc = new ConfigDefCollector([$this->fileScanner]);
         $this->expectException(Exception::class);
         $this->expectExceptionMessage("Invalid required value \"BOGUS\" specified for aws/version");
-        $this->svc->format();
+        $this->callMethod($svc, 'format', [$this->yaml]);
     }
 }
