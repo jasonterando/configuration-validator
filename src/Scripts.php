@@ -73,16 +73,21 @@ class Scripts {
         $i = 0;
         while($i < $argCount) {
             switch(strtolower($a)) {
+                case "help":
+                case "--help":
+                case "?":
+                    echo "Usage:  [--debug|-d] [--ini-file={INI-FILE-MASK}]";
+                    break;
                 case "debug":
                 case "--debug":
                 case "-d":
                     $debug = true;
                     break;
-                case "--ini":
+                case "--ini-file":
                     if($i < $argCount - 1) {
                         $ini = $arguments[++$i];
                     } else {
-                        throw new Exception("--ini must be followed by an INI file name");
+                        throw new Exception("--ini-file must be followed by an INI file name");
                     }
             }
         }

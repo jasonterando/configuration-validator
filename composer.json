@@ -30,6 +30,8 @@
     },
     "extra": [],
     "scripts": {
+        "config-validate": "ConfigurationValidator\\Scripts::ConfigValidate",
+        "config-save-template": "ConfigurationValidator\\Scripts::ConfigSaveTemplate",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
         "test": "phpunit"
