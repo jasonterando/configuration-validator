@@ -26,7 +26,7 @@ use ConfiguraitonValidator\Service\Interfaces\IConfigDefFileScanner;
      */
     protected $configDef = [];
 
-    public function __construct(array $fileScanners, bool $debug = false) {
+    public function __construct($fileScanners, $debug = false) {
         foreach($fileScanners as $fileScanner) {
             if(is_subclass_of($fileScanner, 'IConfigDefFileScanner')) {
                 throw new Exception('File scanners must implement IConfigDefFileScanner');
