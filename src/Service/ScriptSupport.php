@@ -11,7 +11,7 @@ use is_numeric;
 
 class ScriptSupport {
 
-    public function __construct(string $applicationDirectory, string $iniFile = null, bool $debug = null) {
+    public function __construct(string $applicationDirectory, $iniFile = null, $debug = null) {
         $this->applicationDirectory = $applicationDirectory;
         $this->iniFile = $iniFile;
         $this->debug = $debug == true;
