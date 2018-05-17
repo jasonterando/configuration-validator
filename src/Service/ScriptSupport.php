@@ -11,7 +11,7 @@ use is_numeric;
 
 class ScriptSupport {
 
-    public function __construct(string $applicationDirectory, $iniFile = null, $debug = null) {
+    public function __construct($applicationDirectory, $iniFile = null, $debug = false) {
         $this->applicationDirectory = $applicationDirectory;
         $this->iniFile = $iniFile;
         $this->debug = $debug == true;
@@ -121,7 +121,7 @@ class ScriptSupport {
      * @param integer $depth
      * @return string
      */
-    protected function formatAsYaml(array $config, $depth = 0) {
+    protected function formatAsYaml($config, $depth = 0) {
         $s = "";
         foreach($config as $key => $value) {
             $isArr = is_array($value);
@@ -138,5 +138,4 @@ class ScriptSupport {
         }
         return $s;
     }
-    
 }

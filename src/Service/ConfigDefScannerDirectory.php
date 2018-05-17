@@ -5,7 +5,7 @@ use ConfigurationValidator\Service\Interfaces\IConfigDefScanner;
 use Exception;
 
 class ConfigDefScannerDirectory extends ConfigDefScannerYaml implements IConfigDefScanner  {
-    public function __construct(array $directories, bool $debug = false) {
+    public function __construct($directories, $debug = false) {
         $this->setDebug($debug);
         $this->directories = $directories;
     }

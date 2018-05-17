@@ -5,7 +5,7 @@ use Exception;
 class ConfigDefScannerYaml {
     protected $debug = false;
 
-    protected function setDebug(bool $debug) {
+    protected function setDebug($debug) {
         $this->debug = $debug;
     }
     /**
@@ -15,7 +15,7 @@ class ConfigDefScannerYaml {
      * @param array ref $yamlFiles
      * @return void
      */
-    protected function checkDirForConfigYaml(string $dirName, array &$yamlFiles) {
+    protected function checkDirForConfigYaml($dirName, &$yamlFiles) {
         $mask = "$dirName/config-definition*.{yaml,yml}";
         foreach(glob($mask, GLOB_BRACE) as $configDefFileName) {
             $configDef = spyc_load_file($configDefFileName);

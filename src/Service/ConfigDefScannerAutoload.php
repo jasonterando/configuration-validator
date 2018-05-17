@@ -6,7 +6,7 @@ use Composer\Autoload\ClassLoader;
 use Exception;
 
 class ConfigDefScannerAutoload extends ConfigDefScannerYaml implements IConfigDefScanner {
-    public function __construct(ClassLoader $loader, bool $debug = false) {
+    public function __construct($loader, $debug = false) {
         $this->setDebug($debug);
         $this->loader = $loader;
     }
@@ -34,7 +34,7 @@ class ConfigDefScannerAutoload extends ConfigDefScannerYaml implements IConfigDe
      * @param array ref $yamlFiles
      * @return void
      */
-    protected function drilldown($item, array &$yamlFiles) {
+    protected function drilldown($item, &$yamlFiles) {
         if(is_array($item)) {
             foreach($item as $subitem) {
                 $this->drilldown($subitem, $yamlFiles);

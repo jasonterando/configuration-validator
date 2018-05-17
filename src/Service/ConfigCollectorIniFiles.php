@@ -9,7 +9,7 @@ use ConfigurationValidator\Service\Interfaces\IConfigCollector;
  * Based upon Zend's module structure, combine all configuration files
  */
 class ConfigCollectorIniFiles implements IConfigCollector {
-    public function __construct(string $path, bool $debug = false) {
+    public function __construct($path, $debug = false) {
         $this->path = $path;
         $this->debug = $debug;
     }
@@ -41,7 +41,7 @@ class ConfigCollectorIniFiles implements IConfigCollector {
      * @param array $ini
      * @return array
      */
-    protected function splitIniEntries(array $ini) {
+    protected function splitIniEntries($ini) {
         $results = [];
         foreach($ini as $key => $value) {
             if(is_array($value)) {

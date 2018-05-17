@@ -9,7 +9,7 @@ use ConfigurationValidator\Service\Interfaces\IConfigCollector;
  * Based upon Zend's module structure, combine all configuration files
  */
 class ConfigCollectorZendModule implements IConfigCollector {
-    public function __construct(array $zendAppConfig, bool $debug = false) {
+    public function __construct($zendAppConfig, $debug = false) {
         $this->zendAppConfig = $zendAppConfig;
         $this->debug = $debug;
     }

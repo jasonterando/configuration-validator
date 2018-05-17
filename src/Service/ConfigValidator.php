@@ -9,7 +9,7 @@ use is_file;
 class ConfigValidator {
     public const types = ["any", "string", "integer", "number", "boolean", "directory", "file", "url"];
 
-    public function __construct(bool $debug = false) {
+    public function __construct($debug = false) {
         $this->debug = $debug;
     }
 
@@ -21,7 +21,7 @@ class ConfigValidator {
      * @param array $config
      * @return array
      */
-    public function validate(array $configDef, array $config) {
+    public function validate($configDef, $config) {
         $warnings = [];
         $this->performValidation('', $configDef, $config, $warnings);
         return $warnings;
@@ -37,7 +37,7 @@ class ConfigValidator {
      * @param array $warnings
      * @return void
      */
-    protected function performValidation(string $parentKey, array $configDef, array $config, array &$warnings) {
+    protected function performValidation($parentKey, $configDef, $config, &$warnings) {
         foreach($configDef as $configDefKey => $configDefValue) {
             // Value can be an array, which means there are children, 
             // or an object, whch means we should validate the node
@@ -60,7 +60,7 @@ class ConfigValidator {
      * @param array $warnings
      * @return void
      */
-    protected function validateSection(string $parentKey, string $configDefKey, array $configDefSection, 
+    protected function validateSection($parentKey, $configDefKey, $configDefSection, 
         array $config, array &$warnings) {
         if(array_key_exists($configDefKey, $config)) {
             $this->performValidation($parentKey . $configDefKey . '/', 
@@ -80,7 +80,7 @@ class ConfigValidator {
      * @param array $warnings
      * @return void
      */
-    protected function identifyMissingNodes(string $parentKey, array $configDefSection, array &$warnings) {
+    protected function identifyMissingNodes($parentKey, $configDefSection, &$warnings) {
         foreach($configDefSection as $configDefKey => $configDefValue) {
             if(is_array($configDefValue)) {
                 $this->identifyMissingNodes($parentKey . $configDefKey . '/', $configDefValue, $warnings);
@@ -100,7 +100,7 @@ class ConfigValidator {
      * @param array $warnings
      * @return void
      */
-    protected function validateNode(string $parentKey, string $configDefKey, StdClass $configDefValue,
+    protected function validateNode($parentKey, $configDefKey, $configDefValue,
         array $config, array &$warnings) {
         try {
             if(array_key_exists($configDefKey, $config)) {
@@ -122,7 +122,7 @@ class ConfigValidator {
      * @param string $type
      * @return void
      */
-    protected function validateValue($value, string $type) {
+    protected function validateValue($value, $type) {
         switch($type) {
             case "any":
                 break;
