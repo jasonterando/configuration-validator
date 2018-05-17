@@ -11,10 +11,10 @@ use is_numeric;
 
 class ScriptSupport {
 
-    public function __construct(string $applicationDirectory, string $iniFile = null, bool $debug = false) {
+    public function __construct(string $applicationDirectory, string $iniFile = null, bool $debug = null) {
         $this->applicationDirectory = $applicationDirectory;
         $this->iniFile = $iniFile;
-        $this->debug = $debug;
+        $this->debug = $debug == true;
     }
 
     /**
