@@ -169,6 +169,6 @@ use ConfiguraitonValidator\Service\Interfaces\IConfigDefFileScanner;
      * @return boolean
      */
     protected function isValidType($type) {
-        return in_array($type, ConfigValidator::types);
+        return in_array($type, ConfigValidator::$types);
     }
 }

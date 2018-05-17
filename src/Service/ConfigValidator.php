@@ -7,7 +7,7 @@ use is_dir;
 use is_file;
 
 class ConfigValidator {
-    public const types = ["any", "string", "integer", "number", "boolean", "directory", "file", "url"];
+    public static $types = ["any", "string", "integer", "number", "boolean", "directory", "file", "url"];
 
     public function __construct($debug = false) {
         $this->debug = $debug;
